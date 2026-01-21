@@ -1,0 +1,116 @@
+// Ethos Monitor - Database Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Relations surveillées (vouches)
+model Relation {
+  id          String   @id
+  userkey     String
+  name        String?
+  address     String
+  avatarUrl   String?
+  score       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  reviews     Review[]
+  alerts      Alert[]
+
+  @@index([userkey])
+  @@index([address])
+}
+
+// Reviews reçues par les relations
+model Review {
+  id          String   @id
+  relationId  String
+  authorKey   String
+  authorName  String?
+  authorAddr  String?
+  score       Int
+  comment     String?
+  isNegative  Boolean
+  activityId  String?  @unique
+  txHash      String?
+  alerted     Boolean  @default(false)
+  createdAt   DateTime
+  processedAt DateTime @default(now())
+
+  relation    Relation  @relation(fields: [relationId], references: [id], onDelete: Cascade)
+  alerts      Alert[]
+  defenses    Defense[]
+
+  @@index([relationId])
+  @@index([authorKey])
+  @@index([isNegative])
+  @@index([createdAt])
+}
+
+// Alertes envoyées
+// type: NEGATIVE_REVIEW | SLASH | UNVOUCH
+// channel: TELEGRAM | DISCORD | TWITTER | ALL
+// status: PENDING | CONFIRMED | IGNORED | EXPIRED
+model Alert {
+  id          String   @id @default(uuid())
+  reviewId    String
+  relationId  String
+  type        String
+  channel     String
+  status      String   @default("PENDING")
+  messageId   String?
+  sentAt      DateTime @default(now())
+  respondedAt DateTime?
+
+  review      Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  relation    Relation @relation(fields: [relationId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+  @@index([relationId])
+  @@index([status])
+}
+
+// Défenses postées
+// status: PENDING | CONFIRMED | POSTED | FAILED
+model Defense {
+  id           String   @id @default(uuid())
+  reviewId     String
+  targetKey    String
+  score        Int
+  comment      String
+  status       String   @default("PENDING")
+  ethosReviewId String?
+  txHash       String?
+  error        String?
+  createdAt    DateTime @default(now())
+  postedAt     DateTime?
+
+  review       Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+  @@index([status])
+}
+
+// Configuration runtime
+model Config {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+// Logs de monitoring
+model MonitorLog {
+  id           String   @id @default(uuid())
+  runAt        DateTime @default(now())
+  relationsChecked Int
+  reviewsFound     Int
+  newNegative      Int
+  alertsSent       Int
+  errors           String?
+  duration         Int
+}
