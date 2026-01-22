@@ -175,9 +175,10 @@ process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
 
 // Start server
-const PORT = config_values.server.port;
+const PORT = parseInt(process.env.PORT || '3001', 10);
+const HOST = '0.0.0.0';
 
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
   logger.info(`
 ╔═══════════════════════════════════════════════════════════╗
 ║             ETHOS MONITOR - BOT Anti-Slash                ║
