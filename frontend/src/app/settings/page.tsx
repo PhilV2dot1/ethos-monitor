@@ -21,6 +21,7 @@ import {
   Zap,
 } from 'lucide-react';
 import api from '@/lib/api';
+import EthosLogin from '@/components/EthosLogin';
 
 interface NotificationSettings {
   telegram: {
@@ -211,6 +212,20 @@ export default function SettingsPage() {
           <span>{testResult.message}</span>
         </div>
       )}
+
+      {/* Ethos Login Component - shown when token is invalid */}
+      <EthosLogin
+        onTokenUpdate={async (token) => {
+          const result = await api.updateToken(token);
+          if (result.success) {
+            setTestResult({ channel: 'token', success: true, message: 'Connected to Ethos!' });
+            loadSettings();
+          } else {
+            throw new Error(result.error || 'Failed to connect');
+          }
+        }}
+        currentTokenValid={tokenStatus?.valid || false}
+      />
 
       {/* Token Status Card */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
