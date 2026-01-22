@@ -1,5 +1,6 @@
 [phases.setup]
-nixPkgs = ["nodejs_20"]
+nixPkgs = ["nodejs_20", "openssl"]
+aptPkgs = ["openssl", "libssl-dev"]
 
 [phases.install]
 cmds = ["npm install"]
