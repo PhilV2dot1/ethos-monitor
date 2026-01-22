@@ -21,7 +21,9 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: config_values.frontend.url,
+  origin: config_values.server.isProd
+    ? [config_values.frontend.url, /\.vercel\.app$/, /\.railway\.app$/]
+    : '*',
   credentials: true,
 }));
 app.use(express.json());

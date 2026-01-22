@@ -10,8 +10,8 @@ const envSchema = z.object({
 
   // Ethos API
   ETHOS_API_URL: z.string().url().default('https://api.ethos.network'),
-  ETHOS_PRIVY_TOKEN: z.string().min(1),
-  ETHOS_USER_KEY: z.string().min(1),
+  ETHOS_PRIVY_TOKEN: z.string().optional().default(''),
+  ETHOS_USER_KEY: z.string().default('profileId:24640'),
   ETHOS_CLIENT_ID: z.string().default('ethos-monitor@1.0.0'),
 
   // Telegram
